@@ -4,6 +4,7 @@ package com.example.transaction.service;
 import com.example.transaction.entity.Address;
 import com.example.transaction.entity.Employee;
 import com.example.transaction.repository.EmployeeRepository;
+import com.example.transaction.repository.EntityFactoryInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,18 +19,16 @@ public class EmployeeService {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private EntityFactoryInterface entityFactory;
+
     @Transactional
-    public Employee addEmployee(Employee employee) throws Exception {
-        Employee employeeSavedToDB = this.employeeRepository.save(employee);
+    public Employee addEmployee(String name) throws Exception {
+       Employee employee = entityFactory.createEmployee(name);
+       Employee employeeSavedToDb = this.employeeRepository.save(employee);
 
-        Address address = new Address();
-        address.setId(123L);
-        address.setAddress("delhi");
-        address.setEmployee(employee);
-
-        // calling addAddress() method
-        // of AddressService class
-        this.addressService.addAddress(address);
-        return employeeSavedToDB;
+       Address address = entityFactory.createAddress("delhi",employee);
+       this.addressService.addAddress(address);
+       return employeeSavedToDb;
     }
 }
